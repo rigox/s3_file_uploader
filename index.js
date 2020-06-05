@@ -4,6 +4,7 @@ const colors =  require("colors")
 const  morgan =   require("morgan")
 const db =   require("./config/db");
 const dotenv  =  require("dotenv")
+const expressFileUploader =  require("express-fileupload")
 const  app =  express()
 
 //load enviroment variables
@@ -12,11 +13,10 @@ dotenv.config({path:'./config/config.env'})
 //connect toDB 
 db()
 
-//load rotutes 
-const tracks =  require('./routes/tracks')
+
 
 //middleware
-app.use(express.json(), express.urlencoded())
+app.use(express.json(), express.urlencoded({limit: "5000mb",extended:true,parameterLimit:500000000}))
 app.use(cors())
 
 //setup morgan
@@ -24,9 +24,14 @@ if(process.env.NODE_ENV === "development"){
        app.use(morgan())
 }
 
+//add files to the request object
+app.use(expressFileUploader())
 
+
+//load rotutes 
+const tracks =  require('./routes/tracks')
 //setup routes
-app.use('api/v1/tracks',tracks)
+app.use('/api/v1/tracks',tracks)
 
 const PORT = process.env.PORT || 5000 
 

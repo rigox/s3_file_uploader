@@ -15,7 +15,8 @@ const trackSchema =  new Schema({
           type:String
      },
      artWorkPath:{
-       type:String
+       type:String,
+       default:'none'
      },
      genre:{
         type:String
