@@ -82,14 +82,16 @@ exports.uploadArtwork = async(req,res,next)=>{
             ACL:'public-read'
           }
 
-          const record =  await s3.putObject(params)
+           s3.putObject(params, async(err,data)=>{
+                if(err){ throw err }
 
-          track  = await Track.findOneAndUpdate(req.body.name,{artworkPath:artworkPath},{new:true,runValidators:true});
+                track  = await Track.findOneAndUpdate(req.body.name,{artWorkPath:artwork_path},{new:true,runValidators:true});
 
-          res.status(200).json({
-               success:true,
-               data: track
-          })
+                res.status(200).json({
+                    success:true,
+                    data: track
+                })
+           })
 
         } catch (error) {
          console.log(error)
