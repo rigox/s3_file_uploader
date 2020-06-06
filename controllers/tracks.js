@@ -98,3 +98,19 @@ exports.uploadArtwork = async(req,res,next)=>{
          throw error
      }
 }
+
+
+//@Desc add  artwork for the track
+//@Route PUT /api/v1/tracks/artwork/
+//@access private
+exports.getTrack  =  async(req,res,next)=>{
+     try {
+        const track   = await Track.findOne({name:req.body.name})
+        if(!track ){
+       return res.status(400).json({msg:`track ${req.body.name} was ot found`})   
+        }
+     } catch (err) {
+        console.log(err)
+        throw err
+     }
+}
