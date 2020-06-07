@@ -109,8 +109,37 @@ exports.getTrack  =  async(req,res,next)=>{
         if(!track ){
        return res.status(400).json({msg:`track ${req.body.name} was ot found`})   
         }
+        
+        const s3 = new AWS.S3()
+        const params  = {
+            Bucket:process.env.BUCKET_NAME,
+            Key:track.filePath
+        }
+        s3.getObject(params,async(err,data)=>{
+            if(err){
+                console.log(err)
+                 throw err
+
+            }
+        })
+
      } catch (err) {
         console.log(err)
         throw err
      }
+}
+
+//@Desc get track info
+//@Route PUT /api/v1/tracks/info/
+//@access public
+exports.getTrackInfo  =  async(req,res,next)=>{
+      try {
+          const track =  await  Track.findOne({name:req.body.name})
+          if(!track ){
+            return res.status(400).json({msg:`track ${req.body.name} was ot found`})   
+             }
+             res.status(200).json({success:true,data:track})
+      } catch (error) {
+          console.log(error)
+      }
 }
