@@ -1,6 +1,6 @@
 const express = require("express")
 const router =   express.Router()
-const {uploadTrack ,uploadArtwork }    =  require('../controllers/tracks') 
+const {uploadTrack ,uploadArtwork ,getTrack ,getTrackInfo}    =  require('../controllers/tracks') 
 
 router
     .route('/')
@@ -10,5 +10,8 @@ router
     .route('/artwork')
         .put(uploadArtwork)
 
+router
+    .route('/info')
+        .get(getTrackInfo)
 
 module.exports =  router;
