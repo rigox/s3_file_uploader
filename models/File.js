@@ -37,5 +37,10 @@ const trackSchema =  new Schema({
 })
 
 
+trackSchema.pre('save', function(next){
+let temp =   this.name.replace(/\s/g, '')
+this.name =  temp.toLowerCase();
+next()
+});
 
 module.exports =  mongoose.model('tracks',trackSchema)

@@ -6,12 +6,16 @@ router
     .route('/')
        .post(uploadTrack)
 
+router 
+    .route("/:name")
+        .get(getTrack)
+
 router
     .route('/artwork')
         .put(uploadArtwork)
 
 router
-    .route('/info')
+    .route('/info/:name')
         .get(getTrackInfo)
 
 module.exports =  router;

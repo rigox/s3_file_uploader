@@ -100,20 +100,20 @@ exports.uploadArtwork = async(req,res,next)=>{
 }
 
 
-//@Desc add  artwork for the track
-//@Route PUT /api/v1/tracks/artwork/
+//@Desc Gets  the tracks audio file
+//@Route GET /api/v1/tracks/artwork/
 //@access private
 exports.getTrack  =  async(req,res,next)=>{
      try {
-        const track   = await Track.findOne({name:req.body.name})
+        const track   = await Track.findOne({name:req.params.name})
         if(!track ){
-       return res.status(400).json({msg:`track ${req.body.name} was ot found`})   
+       return res.status(400).json({msg:`track ${req.params.name} was ot found`})   
         }
-        
-        const s3 = new AWS.S3()
+        console.log('here'.blue,track.filePath)
+        const s3 = new aws.S3()
         const params  = {
             Bucket:process.env.BUCKET_NAME,
-            Key:track.filePath
+            Key:'tracks/the great Beyond.mp3'
         }
         s3.getObject(params,async(err,data)=>{
             if(err){
@@ -121,6 +121,11 @@ exports.getTrack  =  async(req,res,next)=>{
                  throw err
 
             }
+             console.log(data)
+             res.status(200)
+             res.write(data.Body,'binary')
+             res.end(null, 'binary');
+             
         })
 
      } catch (err) {
@@ -130,13 +135,13 @@ exports.getTrack  =  async(req,res,next)=>{
 }
 
 //@Desc get track info
-//@Route PUT /api/v1/tracks/info/
+//@Route GET /api/v1/tracks/info/:name
 //@access public
 exports.getTrackInfo  =  async(req,res,next)=>{
       try {
-          const track =  await  Track.findOne({name:req.body.name})
+          const track =  await  Track.findOne({name:req.params.name})
           if(!track ){
-            return res.status(400).json({msg:`track ${req.body.name} was ot found`})   
+            return res.status(400).json({msg:`track ${req.body.name} was not found`})   
              }
              res.status(200).json({success:true,data:track})
       } catch (error) {
