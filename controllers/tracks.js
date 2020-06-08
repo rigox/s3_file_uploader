@@ -15,7 +15,9 @@ exports.uploadTrack =  async(req,res,next)=>{
    try {
     const s3  = new aws.S3()
     let file =  req.files.file
-    let file_name = `tracks/${req.body.name}${path.parse(file.name).ext}`
+    let subPath = req.body.name.replace(/\s/g,'')
+    subPath  = subPath.toLowerCase()
+    let file_name = `tracks/${subPath}${path.parse(file.name).ext}`
     let file_path = ''
          //check if the audio file exist already
          const track = await Track.findOne({name:req.body.name});
@@ -44,7 +46,7 @@ exports.uploadTrack =  async(req,res,next)=>{
                console.log(data)
                file_path  = `${process.env.BUCKET_URI}${file_name}`
                req.body.filePath  = file_path
-               
+               req.body.subPath =   file_name
                const record =  await Track.create(req.body)
                res.status(201).json({success:true,data:record})
           })
@@ -71,8 +73,9 @@ exports.uploadArtwork = async(req,res,next)=>{
          if(!file.mimetype.startsWith('image')){
         return res.status(400).json({msg:'it must be an image file'})   
          }
-          
-          let key_name =  `artwork/${req.files.artwork.name}`
+          let name =  req.files.artwork.name.replace(/\s/g, '');
+          name =  name.toLowerCase()
+          let key_name =  `artwork/${name}`
           let artwork_path = `${process.env.BUCKET_URI}${key_name}`
           
           const  params = {
@@ -85,7 +88,7 @@ exports.uploadArtwork = async(req,res,next)=>{
            s3.putObject(params, async(err,data)=>{
                 if(err){ throw err }
 
-                track  = await Track.findOneAndUpdate(req.body.name,{artWorkPath:artwork_path},{new:true,runValidators:true});
+                track  = await Track.findOneAndUpdate({name:req.body.name},{artWorkPath:artwork_path,artsubPath:key_name},{new:true,runValidators:true});
 
                 res.status(200).json({
                     success:true,
@@ -113,7 +116,7 @@ exports.getTrack  =  async(req,res,next)=>{
         const s3 = new aws.S3()
         const params  = {
             Bucket:process.env.BUCKET_NAME,
-            Key:'tracks/the great Beyond.mp3'
+            Key:track.subPath
         }
         s3.getObject(params,async(err,data)=>{
             if(err){
@@ -147,4 +150,81 @@ exports.getTrackInfo  =  async(req,res,next)=>{
       } catch (error) {
           console.log(error)
       }
+}
+
+//@Desc deletes track track and its corresponding artwork
+//@Route Delete /api/v1/tracks/:name
+//@access public
+exports.deleteTrack =  async(req,res,next)=>{
+      try {
+          const track  = await Track.findOne({name:req.params.name})
+          if(!track){
+            return res.status(404).json({msg:`file with name ${req.params.name} was not found`})
+          }
+        const s3 = new aws.S3()
+        
+       //delete from objects pertaining to track on both artowk and track buckets
+      
+       const objects =  [{Key:track.subPath},{Key:track.artsubPath}]
+       const params = {
+        Bucket:process.env.BUCKET_NAME,
+        Delete:{
+            Objects:objects,
+            Quiet:false
+        }
+     }
+      
+     s3.deleteObjects(params, async(err,data)=>{
+          if(err){
+               console.log(err)
+               res.end()
+               throw err
+
+          }
+           await track.remove()
+           res.status(200).json({msg:"success",data:{}})
+     })
+       
+   
+
+      } catch ( err) {
+           console.log(err)
+            throw err
+      }
+}
+
+//@Desc gets the tracks artwork
+//@Route GET /api/v1/tracks/artwork/:name
+//@access public
+exports.getTrackArtwork  =   async(req,res,next)=>{
+     try {
+          const track =  await Track.findOne({name:req.params.name})
+          if(!track){
+               return res.status(404).json({msg:`there is no track with the name of ${name}`});
+          }
+          const s3 = new aws.S3()
+          console.log(track)
+          const params =  {
+               Bucket:process.env.BUCKET_NAME ,
+               Key: track.artsubPath
+          }
+
+          s3.getObject(params,function(err,data){
+                if(err){
+                     console.log(err)
+                     throw err;
+                }
+                res.status(200)
+                res.write(data.Body,'binary')
+                res.end(null, 'binary');
+          })
+ 
+        
+        
+
+     } catch (err) {
+            console.log(err)
+            throw err
+     }
+
 }

@@ -24,6 +24,13 @@ const trackSchema =  new Schema({
       artist:{
         type:String
       },
+      subPath:{
+        type:String,
+        default:'none'
+      },
+      artsubPath:{
+        type:String,
+      },
       createdAt:{
         type:Date,
         default: Date.now()
