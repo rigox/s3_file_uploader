@@ -30,6 +30,7 @@ const trackSchema =  new Schema({
       },
       artsubPath:{
         type:String,
+        default:'none'
       },
       createdAt:{
         type:Date,

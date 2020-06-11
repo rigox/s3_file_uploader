@@ -35,7 +35,9 @@ exports.uploadTrack =  async(req,res,next)=>{
               Bucket:process.env.BUCKET_NAME,
               Key: file_name, 
               Body:  file.data,
-              ACL:'public-read'
+              ACL:'public-read',
+              ContentType:file.mimetype
+
           }    
   
           s3.putObject(params,async(err,data)=>{
@@ -82,7 +84,8 @@ exports.uploadArtwork = async(req,res,next)=>{
             Bucket:process.env.BUCKET_NAME,
             Key: key_name, 
             Body:  file.data,
-            ACL:'public-read'
+            ACL:'public-read',
+           ContentType:file.mimetype
           }
 
            s3.putObject(params, async(err,data)=>{
@@ -164,8 +167,12 @@ exports.deleteTrack =  async(req,res,next)=>{
         const s3 = new aws.S3()
         
        //delete from objects pertaining to track on both artowk and track buckets
-      
-       const objects =  [{Key:track.subPath},{Key:track.artsubPath}]
+        const objects  = [];
+        if(track.artsubPath!=='none'){
+           
+            objects.push({Key:track.artsubPath})
+        }
+        objects.push({Key:track.subPath});
        const params = {
         Bucket:process.env.BUCKET_NAME,
         Delete:{
@@ -219,9 +226,6 @@ exports.getTrackArtwork  =   async(req,res,next)=>{
                 res.end(null, 'binary');
           })
  
-        
-        
-
      } catch (err) {
             console.log(err)
             throw err
