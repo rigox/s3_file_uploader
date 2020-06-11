@@ -1,9 +1,12 @@
 const express = require("express")
 const router =   express.Router()
-const {uploadTrack ,uploadArtwork ,getTrack ,getTrackInfo,deleteTrack,getTrackArtwork}    =  require('../controllers/tracks') 
+const {uploadTrack ,uploadArtwork 
+    ,getTrack ,getTrackInfo,deleteTrack,
+    getTrackArtwork, getAllTracks}    =  require('../controllers/tracks') 
 
 router
     .route('/')
+       .get(getAllTracks)
        .post(uploadTrack)
 
 router 

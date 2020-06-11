@@ -232,3 +232,18 @@ exports.getTrackArtwork  =   async(req,res,next)=>{
      }
 
 }
+
+//@Desc gets all tracks information
+//@Route GET /api/v1/tracks/
+//@access public
+exports.getAllTracks =  async(req,res,next)=>{
+     try {
+        const tracks =  await  Track.find({});
+        
+        res.status(200).json({success:true,lenght:tracks.length,data:tracks})
+     
+     } catch (err) {
+         console.log(err)
+        res.startus(500).json({err})
+        }
+}
